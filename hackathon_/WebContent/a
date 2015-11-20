@@ -1,0 +1,45 @@
+<p>text: <input class="input-xxlarge" type="text" name="complteList" list="complteList" placeholder="type in a word, e.g. india..."
+  data-bind='value: text, valueUpdate: "afterkeydown"' /></p>
+   
+   <datalist id="complteList" data-bind="foreach:completeList">
+                <option data-bind="value:$data" />
+            </datalist>
+   
+   <p>Second String: <input data-bind="value: secondString" /></p>
+
+   <p>First String: <strong data-bind="text: text">Hi</strong></p>
+   <p>Second String: <strong data-bind="text: secondString">There</strong></p>
+
+   <p>Derived String: <strong data-bind="text: thirdString"></strong></p>
+   
+   
+   
+   
+   function AppViewModel() {
+	var self = this;
+	self.completeList=[ 'Jan', 'Feb', 'Mar', 'etc' ];
+    self.text = ko.observable();
+    self.secondString = ko.observable("Enter Second String");
+
+    self.updated = ko.computed(function (val) {
+        var res = $.ajax({
+            url: 'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + self.text(),
+            data: {},
+            dataType: 'jsonp'
+        });
+        res.done(function (data) {
+            self.completeList(data["1"]);
+        });
+    }, this).extend({
+        throttle: 250
+    });
+    
+    self.thirdString = ko.computed(function() {
+	     return self.text() + " " + this.secondString();
+ }, this).extend({
+     throttle: 250
+ });
+}
+
+// Activates knockout.js
+ko.applyBindings(new AppViewModel());
